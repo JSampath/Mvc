@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using Microsoft.Framework.Internal;
 using Xunit;
 
@@ -586,6 +587,69 @@ namespace Microsoft.AspNet.Mvc.ModelBinding.Metadata
             Assert.Same(typeof(int), metadata.BinderType);
         }
 
+        [Fact]
+        public void IsRequired_DefaultsToTrueForValueType()
+        {
+            // Arrange
+            var attributes = new object[]
+            {
+            };
+
+            var provider = CreateProvider(attributes);
+
+            // Act
+            var metadata = provider.GetMetadataForProperty(typeof(string), "Length");
+
+            // Assert
+            Assert.True(metadata.IsRequired);
+        }
+
+        [Fact]
+        public void IsRequired_DefaultsToFalseForReferenceType()
+        {
+            // Arrange
+            var attributes = new[]
+            {
+                new RequiredAttribute(),
+            };
+
+            var provider = CreateProvider(attributes);
+
+            // Act
+            var metadata = provider.GetMetadataForProperty(typeof(Person), nameof(Person.Parent));
+
+            // Assert
+            Assert.False(metadata.IsRequired);
+        }
+
+        [Fact]
+        public void IsRequired_WithAttribute()
+        {
+            // Arrange
+            var provider = TestModelMetadataProvider.CreateDefaultProvider();
+
+            // Act
+            var metadata = provider.GetMetadataForProperty(typeof(Person), nameof(Person.Parent));
+
+            // Assert
+            Assert.True(metadata.IsRequired);
+        }
+
+        [Fact]
+        public void IsRequired_WithDataMemberRequired()
+        {
+            // Arrange
+            var provider = TestModelMetadataProvider.CreateDefaultProvider();
+
+            // Act
+            var metadata = provider.GetMetadataForProperty(
+                typeof(DataContractModel),
+                nameof(DataContractModel.DataMemberRequired));
+
+            // Assert
+            Assert.True(metadata.IsRequired);
+        }
+
         private IModelMetadataProvider CreateProvider(params object[] attributes)
         {
             return new AttributeInjectModelMetadataProvider(attributes);
@@ -619,14 +683,6 @@ namespace Microsoft.AspNet.Mvc.ModelBinding.Metadata
                     DataFormatString = "value",
                 };
             }
-        }
-
-        private void ActionWithoutBindAttribute(User param)
-        {
-        }
-
-        private void ActionWithBindAttribute([Bind(new string[] { "IsAdmin" }, Prefix = "ParameterPrefix")] User param)
-        {
         }
 
         public class TypeBasedBinderAttribute : Attribute, IModelNameProvider
@@ -691,6 +747,13 @@ namespace Microsoft.AspNet.Mvc.ModelBinding.Metadata
             public int UserName { get; set; }
 
             public int NotIncludedOrExcluded { get; set; }
+        }
+
+        [DataContract]
+        private class DataContractModel
+        {
+            [DataMember(IsRequired = true)]
+            public int? DataMemberRequired { get; set; }
         }
 
         private class AttributeInjectModelMetadataProvider : DefaultModelMetadataProvider

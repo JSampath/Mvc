@@ -539,6 +539,46 @@ namespace Microsoft.AspNet.Mvc.ModelBinding.Metadata
             Assert.Equal(expectedKeyValuePairs, context.DisplayMetadata.EnumDisplayNamesAndValues);
         }
 
+        [Fact]
+        public void GetBindingDetails_RequiredAttribute_SetsIsRequiredToTrue()
+        {
+            // Arrange
+            var provider = new DataAnnotationsMetadataProvider();
+
+            var required = new RequiredAttribute();
+
+            var attributes = new Attribute[] { required };
+            var key = ModelMetadataIdentity.ForProperty(typeof(int), "Length", typeof(string));
+            var context = new BindingMetadataProviderContext(key, attributes);
+
+            // Act
+            provider.GetBindingMetadata(context);
+
+            // Assert
+            Assert.True(context.BindingMetadata.IsRequired);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [InlineData(null)]
+        public void GetBindingDetails_NoRequiredAttribute_IsRequiredLeftAlone(bool? value)
+        {
+            // Arrange
+            var provider = new DataAnnotationsMetadataProvider();
+
+            var attributes = new Attribute[] { };
+            var key = ModelMetadataIdentity.ForProperty(typeof(int), "Length", typeof(string));
+            var context = new BindingMetadataProviderContext(key, attributes);
+            context.BindingMetadata.IsRequired = value;
+
+            // Act
+            provider.GetBindingMetadata(context);
+
+            // Assert
+            Assert.Equal(value, context.BindingMetadata.IsRequired);
+        }
+
         private class EmptyClass
         {
         }
