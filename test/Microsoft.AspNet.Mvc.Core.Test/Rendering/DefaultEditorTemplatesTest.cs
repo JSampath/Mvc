@@ -1012,10 +1012,20 @@ Environment.NewLine;
             }
 
             public IEnumerable<ModelClientValidationRule> GetClientValidationRules(
-                ModelExplorer modelExplorer, 
+                ModelExplorer modelExplorer,
                 string name)
             {
                 return Enumerable.Empty<ModelClientValidationRule>();
+            }
+
+            public IEnumerable<SelectListItem> GetSelectList<TEnum>() where TEnum : struct
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerable<SelectListItem> GetSelectList([NotNull] Type enumType)
+            {
+                throw new NotImplementedException();
             }
 
             public HtmlString Hidden(string name, object value, object htmlAttributes)

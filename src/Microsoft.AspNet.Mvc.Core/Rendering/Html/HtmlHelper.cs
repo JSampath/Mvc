@@ -351,6 +351,35 @@ namespace Microsoft.AspNet.Mvc.Rendering
         }
 
         /// <inheritdoc />
+        public IEnumerable<SelectListItem> GetSelectList<TEnum>() where TEnum : struct
+        {
+            var type = typeof(TEnum);
+            var metadata = MetadataProvider.GetMetadataForType(type);
+            if (!metadata.IsEnum || metadata.IsFlagsEnum)
+            {
+                throw new ArgumentException(
+                    Resources.FormatHtmlHelper_TypeNotSupported(type.FullName),
+                    nameof(TEnum));
+            }
+
+            return GetSelectList(metadata);
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<SelectListItem> GetSelectList([NotNull] Type enumType)
+        {
+            var metadata = MetadataProvider.GetMetadataForType(enumType);
+            if (!metadata.IsEnum || metadata.IsFlagsEnum)
+            {
+                throw new ArgumentException(
+                    Resources.FormatHtmlHelper_TypeNotSupported(enumType.FullName),
+                    nameof(enumType));
+            }
+
+            return GetSelectList(metadata);
+        }
+
+        /// <inheritdoc />
         public HtmlString Hidden(string expression, object value, object htmlAttributes)
         {
             return GenerateHidden(
@@ -1015,6 +1044,23 @@ namespace Microsoft.AspNet.Mvc.Rendering
             string expression)
         {
             return _htmlGenerator.GetClientValidationRules(ViewContext, modelExplorer, expression);
+        }
+
+        protected virtual IEnumerable<SelectListItem> GetSelectList([NotNull] ModelMetadata metadata)
+        {
+            var selectList = new List<SelectListItem>();
+            foreach (var keyValuePair in metadata.EnumDisplayNamesAndValues)
+            {
+                var selectListItem = new SelectListItem
+                {
+                    Text = keyValuePair.Key,
+                    Value = keyValuePair.Value,
+                };
+
+                selectList.Add(selectListItem);
+            }
+
+            return selectList;
         }
     }
 }

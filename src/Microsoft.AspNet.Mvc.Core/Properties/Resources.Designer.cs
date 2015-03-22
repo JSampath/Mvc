@@ -731,6 +731,22 @@ namespace Microsoft.AspNet.Mvc.Core
         }
 
         /// <summary>
+        /// The type '{0}' is not supported.
+        /// </summary>
+        internal static string HtmlHelper_TypeNotSupported
+        {
+            get { return GetString("HtmlHelper_TypeNotSupported"); }
+        }
+
+        /// <summary>
+        /// The type '{0}' is not supported.
+        /// </summary>
+        internal static string FormatHtmlHelper_TypeNotSupported(object p0)
+        {
+            return string.Format(CultureInfo.CurrentCulture, GetString("HtmlHelper_TypeNotSupported"), p0);
+        }
+
+        /// <summary>
         /// The ViewData item that has the key '{0}' is of type '{1}' but must be of type '{2}'.
         /// </summary>
         internal static string HtmlHelper_WrongSelectDataType
